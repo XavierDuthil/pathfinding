@@ -40,10 +40,10 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
     Pathfinding pathfinding;
     
     int size=1000; //taille de la grille (en pixels)
-    double oamount=0.2; //proportion d'obstacles
+    double oamount=0.1; //proportion d'obstacles
     
-    class VertexColorTransformer implements Transformer<Object,Color> {
-
+    class VertexColorTransformer implements Transformer<Object,Color>
+    {
         //palette de couleur
         HashMap<Object,Color> colortable;
         
@@ -194,7 +194,7 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
         }
         
         // Rajoute des obstacles verticaux
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < 25; i++)
         {
             int j = 1235 - i*40;
             vcolor.put("v" +j, Color.gray);

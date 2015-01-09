@@ -133,7 +133,7 @@ public class Pathfinding
                     
                     frame.vcolor.put(neighbor, Color.blue);
                     frame.repaint();
-                    //try {Thread.sleep(10);} catch (Exception e){}
+                    try {Thread.sleep(10);} catch (Exception e){}
                     
                     // Ajout de pénalité s'il s'agit d'un pas en arrière
                     if (tentative_f_score > f_score.get(current))
@@ -152,7 +152,17 @@ public class Pathfinding
         
     public double heuristicCostEstimate(String a, String b)
     {
-        return manhattanDistBetween(a, b);
+        //return manhattanDistBetween(a, b);
+        
+        // Diagonal shortcut
+        Point2D startPoint = frame.coordmap.get(a);
+        Point2D goalPoint =  frame.coordmap.get(b);
+        double xDistance = Math.abs(startPoint.getX()-goalPoint.getX());
+        double yDistance = Math.abs(startPoint.getY()-goalPoint.getY());
+        if (xDistance > yDistance)
+             return 14*yDistance + 10*(xDistance-yDistance);
+        else
+             return 14*xDistance + 10*(yDistance-xDistance);
     }
     
     public ArrayList<String> reconstructPath(HashMap<String, String> parentNode, String current)
@@ -192,7 +202,6 @@ public class Pathfinding
             maxPenalty = Collections.max(penalties.values());
         int currentPenalty = 0;
         boolean found = false;
-        System.out.println(maxPenalty);
         
         while (!found && currentPenalty <= maxPenalty)
         {
