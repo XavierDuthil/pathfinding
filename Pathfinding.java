@@ -9,6 +9,7 @@ import java.util.HashMap;
 public class Pathfinding
 {
     SPJFrame frame;
+    int maxPenalty = 0;
             
     public Pathfinding(SPJFrame frame)
     {
@@ -35,7 +36,8 @@ public class Pathfinding
         // Penalités dans ce dictionnaire
         HashMap<String, Integer> penalties = new HashMap<>();
         
-        System.out.println("Distance minimal estimée : " +manhattanDistBetween(start, goal)/distBetween("v0", "v1")+2);
+        System.out.println("Distance Manhattan totale : " +(manhattanDistBetween(start, goal)/distBetween("v0", "v1")+2));
+        System.out.println("Distance diagonale totale : " +(manhattanDistBetween(start, goal)/distBetween("v0", "v1")+2)/2);
         
         while (!openNodes.isEmpty())
         {
@@ -77,47 +79,60 @@ public class Pathfinding
                 {
                     openNodes.remove(neighbor);
                     
-                    
+                    int penalty = 0;
                     // Ajout de pénalité s'il s'agit d'un pas en arrière
                     if (tentative_f_score > f_score.get(current))
                     {
+                        
                         if (penalties.containsKey(current))
-                            penalties.put(neighbor, penalties.get(current) + 1);
+                            penalty = penalties.get(current) + 1;
                         else
-                            penalties.put(neighbor, 1);
-                        frame.vcolor.put(neighbor, Color.pink);
+                            penalty = 1;
                     }
                     
                     else
                     {
                         // On met à jour la pénalité vu qu'il s'agit d'un meilleur chemin
                         if (penalties.containsKey(current))
-                            penalties.put(neighbor, penalties.get(current));
+                            penalty = penalties.get(current);
                         else
-                            penalties.put(neighbor, 0);
+                            penalty = 0;
                     }
-                        
+                    
+                    if (penalty > maxPenalty)
+                        maxPenalty = penalty;
+                    penalties.put(neighbor, penalty);
+                    frame.vcolor.put(neighbor, colorPenalty(penalty));
                 }
                 
                 // if already visited but path better now : update
                 if (closedNodes.contains(neighbor) && g_score.get(neighbor) > tentative_g_score)
                 {
                     closedNodes.remove(neighbor);
+                    int penalty = 0;
                     // Ajout de pénalité s'il s'agit d'un pas en arrière
                     if (tentative_f_score > f_score.get(current))
                     {
+                        
                         if (penalties.containsKey(current))
-                            penalties.put(neighbor, penalties.get(current) + 1);
+                            penalty = penalties.get(current) + 1;
                         else
-                            penalties.put(neighbor, 1);
-                        frame.vcolor.put(neighbor, Color.pink);
+                            penalty = 1;
                     }
                     
-                    // On met à jour la pénalité vu qu'il s'agit d'un meilleur chemin
-                    if (penalties.containsKey(current))
-                        penalties.put(neighbor, penalties.get(current));
                     else
-                        penalties.put(neighbor, 0);
+                    {
+                        // On met à jour la pénalité vu qu'il s'agit d'un meilleur chemin
+                        if (penalties.containsKey(current))
+                            penalty = penalties.get(current);
+                        else
+                            penalty = 0;
+                    }
+                    if (penalty > maxPenalty)
+                        maxPenalty = penalty;
+                    
+                    penalties.put(neighbor, penalty);
+                    frame.vcolor.put(neighbor, colorPenalty(penalty));
                 }
                 
                 // new value to register
@@ -131,19 +146,30 @@ public class Pathfinding
                     if (neighbor.equals(goal))
                         return reconstructPath(parentNode, goal);
                     
-                    frame.vcolor.put(neighbor, Color.blue);
-                    frame.repaint();
-                    try {Thread.sleep(10);} catch (Exception e){}
+                    int penalty = 0;
+                    if (penalties.containsKey(current))
+                        penalty = penalties.get(current);
                     
                     // Ajout de pénalité s'il s'agit d'un pas en arrière
                     if (tentative_f_score > f_score.get(current))
                     {
                         if (penalties.containsKey(current))
-                            penalties.put(neighbor, penalties.get(current) + 1);
+                        {
+                            penalty = penalties.get(current) + 1;
+                            if (penalty > maxPenalty)
+                                maxPenalty = penalty;
+                        }
                         else
-                            penalties.put(neighbor, 1);
-                        frame.vcolor.put(neighbor, Color.pink);
+                            penalty = 1;
+                        //frame.vcolor.put(neighbor, new Color(penalty*50, 0, 0));
                     }
+                    
+                    penalties.put(neighbor, penalty);
+                    frame.vcolor.put(neighbor, colorPenalty(penalty));
+                    frame.repaint();
+                    try {Thread.sleep(10);} catch (Exception e){}
+                    
+                    
                 }
             }
         }
@@ -182,6 +208,7 @@ public class Pathfinding
         }
         
         System.out.println("Distance parcourue : " +path.size());
+        System.out.println("Max penalty : " +maxPenalty);
         return path;
     }
     
@@ -197,9 +224,6 @@ public class Pathfinding
         String closestNode = null;
         double min = -1;
 
-        int maxPenalty = 0;
-        if (!penalties.values().isEmpty())
-            maxPenalty = Collections.max(penalties.values());
         int currentPenalty = 0;
         boolean found = false;
         
@@ -240,5 +264,25 @@ public class Pathfinding
         double yDiff = Math.abs(goalPoint.getY() - startPoint.getY());
         double estimatedCost =  xDiff + yDiff;
         return estimatedCost;
+    }
+    
+    public Color colorPenalty(int penalty)
+    {
+        Color color;
+        if (penalty <= 5)
+            color = new Color(penalty*50,0,255);
+        
+        else if (penalty <= 10)
+        {
+            color = new Color(255,0,255-(penalty-5)*50);
+        }
+        
+        else if (penalty <= 15)
+            color = new Color(255-(penalty-10)*50,0,255-(penalty-10)*50);
+        
+         else
+            color = Color.BLACK;
+        
+        return color;
     }
 }

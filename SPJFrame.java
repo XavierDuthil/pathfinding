@@ -27,8 +27,14 @@ import org.apache.commons.collections15.TransformerUtils;
  *
  * @author V. Levorato
  */
-public class SPJFrame extends javax.swing.JFrame implements ActionListener {
-
+public class SPJFrame extends javax.swing.JFrame implements ActionListener
+{
+    private static final boolean MODE8DIRECTION = true;
+    private static final boolean OBSTACLE = false;
+ 
+    int size=1000; //taille de la grille (en pixels)
+    double oamount=0.4; //proportion d'obstacles
+    
     public Graph<String,Number> g;
     public VisualizationViewer vv;
     
@@ -38,9 +44,6 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
     
     JButton launchButton;
     Pathfinding pathfinding;
-    
-    int size=1000; //taille de la grille (en pixels)
-    double oamount=0.1; //proportion d'obstacles
     
     class VertexColorTransformer implements Transformer<Object,Color>
     {
@@ -180,6 +183,9 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
                 }
             }
         
+        if (!OBSTACLE)
+            return;
+        
         // Rajoute des obstacles horizontaux
         for (int i = 1210; i < 1235; i++)
         {
@@ -210,6 +216,7 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
 
     private Graph<String,Number> generateVertexGrid(Map<String,Point2D> vlf, Dimension d, int interval) {
         int count = d.width/interval * d.height/interval;
+        int lineCount = d.width/interval;
         Graph<String,Number> graph = new SparseGraph<String,Number>();
         int edgeCount = 0;
         for(int i=0; i<count; i++) {
@@ -222,16 +229,34 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener {
             vlf.put(vertex, location);
             graph.addVertex(vertex);
             
+            // Liaisons horizontales
             if (i%(d.width/interval) != 0)
             {
                 graph.addEdge(edgeCount, "v"+(i-1), "v"+i);
                 edgeCount ++;
             }
+            // Liaisons verticales
             if (i < count - (d.height/interval))
             {
-                graph.addEdge(edgeCount, "v"+i, "v"+(i+d.width/interval));
+                graph.addEdge(edgeCount, "v"+i, "v"+(i+lineCount));
                 edgeCount ++;
-            }            
+            }
+            
+            if (!MODE8DIRECTION)
+                continue;
+            
+            // Liaisons diagonales '\'
+            if (i%(lineCount) != 0 && i > lineCount)
+            {
+                graph.addEdge(edgeCount, "v"+(i-1-lineCount), "v"+i);
+                edgeCount ++;
+            }
+            // Liaisons diagonales '/'
+            if (i%(lineCount) != 0 && i < count - lineCount)
+            {
+                graph.addEdge(edgeCount, "v"+i, "v"+(i-1+lineCount));
+                edgeCount ++;
+            }
         }
         return graph;
     }
