@@ -29,11 +29,11 @@ import org.apache.commons.collections15.TransformerUtils;
  */
 public class SPJFrame extends javax.swing.JFrame implements ActionListener
 {
-    private static final boolean MODE8DIRECTION = true;
+    private static final boolean MODE8DIRECTION = false;
     private static final boolean OBSTACLE = false;
  
     int size=1000; //taille de la grille (en pixels)
-    double oamount=0.4; //proportion d'obstacles
+    double oamount=0.35; //proportion d'obstacles
     
     public Graph<String,Number> g;
     public VisualizationViewer vv;
@@ -170,6 +170,18 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener
         String end=getTargetNode();
         
         for(String v: g.getVertices())
+        {
+            boolean stop = false;
+            for (int i = 0; i < 6; i++)
+                if (v.equals("v"+i) || v.equals("v"+(i+40)) || v.equals("v"+(i+80)) || v.equals("v"+(i+120)) || v.equals("v"+(i+160)) || v.equals("v"+(i+200)))
+                {
+                    stop = true;
+                    break;
+                }
+
+            if (stop)
+                continue;
+                    
             if(Math.random()<oamount && !v.equals(start) && !v.equals(end))
             {
                 vcolor.put(v, Color.gray);
@@ -182,7 +194,7 @@ public class SPJFrame extends javax.swing.JFrame implements ActionListener
                     g.removeEdge(edge);
                 }
             }
-        
+        }
         if (!OBSTACLE)
             return;
         

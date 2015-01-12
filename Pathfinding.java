@@ -167,7 +167,7 @@ public class Pathfinding
                     penalties.put(neighbor, penalty);
                     frame.vcolor.put(neighbor, colorPenalty(penalty));
                     frame.repaint();
-                    try {Thread.sleep(10);} catch (Exception e){}
+                    try {Thread.sleep(8);} catch (Exception e){}
                     
                     
                 }
